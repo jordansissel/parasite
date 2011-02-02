@@ -11,8 +11,8 @@
 
 static int initialized = 0;
 static pthread_t parasite_thread;
-static void (*malloc__)(size_t size) = NULL;
-static int (*open__)(const char *, int, ...) = NULL;
+static void* (*malloc__)(size_t size) = NULL;
+static int (*open__)(const char *, int) = NULL;
 
 struct parasite {
   int pid;
@@ -27,7 +27,7 @@ void parasite_func(void *arg) {
   ruby_exec();
   ruby_finalize();
 
-  printf("parasite ruby ended\n");
+  fprintf(stderr, "parasite ruby ended\n");
 }
 
 void parasite_init(const char *origin_func) {
@@ -36,7 +36,7 @@ void parasite_init(const char *origin_func) {
   }
 
   initialized = 1;
-  printf("Parasite initialized by hooking '%s'\n", origin_func);
+  printf(stderr, "Parasite initialized by hooking '%s'\n", origin_func);
   parasite.pid = getpid();
   pthread_create(&parasite_thread, NULL, (void *)parasite_func, NULL);
 }
@@ -47,7 +47,7 @@ void *malloc(size_t size) {
     malloc__ = dlsym(RTLD_NEXT, "malloc");
     parasite_init("malloc");
   }
-  malloc__(size);
+  return malloc__(size);
 }
 
 int open(const char *path, int mode, ...) {
