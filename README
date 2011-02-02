@@ -1,0 +1,13 @@
+Parasite - live along side a process. Die when it dies.
+
+Example: Serving a HTTP from /bin/sleep.
+
+% PARASITE_RUBY=./sinatra-example.rb LD_PRELOAD=./parasite.so sleep 360
+Parasite initialized by hooking 'malloc'
+== Sinatra/1.1.0 has taken the stage on 4567 for development with backup from Thin
+>> Thin web server (v1.2.7 codename No Hup)
+>> Maximum connections set to 1024
+>> Listening on 0.0.0.0:4567, CTRL+C to stop
+127.0.0.1 - - [01/Feb/2011 19:10:25] "GET / HTTP/1.1" 200 12 0.0019
+127.0.0.1 - - [01/Feb/2011 19:10:25] "GET /favicon.ico HTTP/1.1" 404 420 0.0008
+

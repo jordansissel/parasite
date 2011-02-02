@@ -6,16 +6,35 @@
 #include <pthread.h>
 #include <string.h>
 
+/* Add a ruby interpreter */
+#include "ruby.h"
+
 static int initialized = 0;
 static pthread_t parasite_thread;
 static void (*malloc__)(size_t size) = NULL;
 static int (*open__)(const char *, int, ...) = NULL;
 
+struct parasite {
+  int pid;
+};
+
+static struct parasite parasite;
+
 void parasite_func(void *arg) {
-  while (1) {
-    printf("Parasite\n");
-    sleep(1);
-  }
+  //system("ulimit -a");
+  //system("id");
+  //while (1) {
+    //printf("Parasite[%d]\n", parasite.pid);
+    //sleep(1);
+  //}
+  
+  ruby_init();
+  ruby_init_loadpath();
+  rb_load_file(getenv("PARASITE_RUBY"));
+  ruby_exec();
+  ruby_finalize();
+
+  printf("parasite ruby ended\n");
 }
 
 void parasite_init(const char *origin_func) {
@@ -23,8 +42,9 @@ void parasite_init(const char *origin_func) {
     return;
   }
 
-  printf("Parasite initialized by hooking '%s'\n", origin_func);
   initialized = 1;
+  printf("Parasite initialized by hooking '%s'\n", origin_func);
+  parasite.pid = getpid();
   pthread_create(&parasite_thread, NULL, (void *)parasite_func, NULL);
 }
 
