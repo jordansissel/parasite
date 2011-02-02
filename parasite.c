@@ -21,13 +21,6 @@ struct parasite {
 static struct parasite parasite;
 
 void parasite_func(void *arg) {
-  //system("ulimit -a");
-  //system("id");
-  //while (1) {
-    //printf("Parasite[%d]\n", parasite.pid);
-    //sleep(1);
-  //}
-  
   ruby_init();
   ruby_init_loadpath();
   rb_load_file(getenv("PARASITE_RUBY"));
