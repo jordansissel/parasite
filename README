@@ -16,3 +16,12 @@ Example: Serving a HTTP from /bin/sleep.
     User time: 0.78<br>
     System time: 0.16
 
+
+Possible use cases:
+
+* Expose internal-process data from any process over HTTP, etc, without needing
+  to modify said program - and without requiring root access necessarily to access it.
+* Allow coordinated handoff of server sockets without modifying the main
+  program (this will be tricky, but should work nicely)
+* Embed a script runtime (ruby, python, perl, nodejs, etc) into any running program.
+
