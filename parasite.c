@@ -30,7 +30,12 @@ static struct parasite parasite;
 void parasite_func(void *arg) {
   ruby_init();
   ruby_init_loadpath();
-  rb_load_file(getenv("PARASITE_RUBY"));
+  const char *script = getenv("PARASITE_RUBY");
+  if (script == NULL) {
+    fprintf(stderr, "No script given. Missing PARASITE_RUBY in environment?\n");
+    return;
+  }
+  rb_load_file(script);
   ruby_exec();
   ruby_finalize();
 
