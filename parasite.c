@@ -6,6 +6,11 @@
 #include <pthread.h>
 #include <string.h>
 
+/* For bind(2) */
+#include <sys/types.h>          /* See NOTES */
+#include <sys/socket.h>
+
+
 /* Add a ruby interpreter */
 #include "ruby.h"
 
@@ -13,6 +18,8 @@ static int initialized = 0;
 static pthread_t parasite_thread;
 static void* (*malloc__)(size_t size) = NULL;
 static int (*open__)(const char *, int) = NULL;
+static int (*bind__)(int sockfd, const struct sockaddr *addr,
+                     socklen_t addrlen) = NULL;
 
 struct parasite {
   int pid;
@@ -36,7 +43,7 @@ void parasite_init(const char *origin_func) {
   }
 
   initialized = 1;
-  printf(stderr, "Parasite initialized by hooking '%s'\n", origin_func);
+  fprintf(stderr, "Parasite initialized by hooking '%s'\n", origin_func);
   parasite.pid = getpid();
   pthread_create(&parasite_thread, NULL, (void *)parasite_func, NULL);
 }
@@ -58,3 +65,14 @@ int open(const char *path, int mode, ...) {
   }
   return open__(path, mode);
 }
+
+int bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen) {
+  if (!bind__) {
+    /* RTLD_NEXT should work on FreeBSD and Linux */
+    bind__ = dlsym(RTLD_NEXT, "bind");
+    parasite_init("bind");
+  }
+
+  return bind__(sockfd, addr, addrlen);
+}
+
