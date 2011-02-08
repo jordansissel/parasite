@@ -1,6 +1,6 @@
-Parasite - live along side a process. Die when it dies.
+# Parasite - live along side a process. Die when it dies.
 
-Example: Serving a HTTP from /bin/sleep.
+## Example: Serving a HTTP from /bin/sleep.
 
     % PARASITE_RUBY=./sinatra-example.rb LD_PRELOAD=./parasite.so sleep 360
     Parasite initialized by hooking 'malloc'
@@ -17,11 +17,22 @@ Example: Serving a HTTP from /bin/sleep.
     System time: 0.16
 
 
-Possible use cases:
+## Possible use cases:
 
 * Expose internal-process data from any process over HTTP, etc, without needing
   to modify said program - and without requiring root access necessarily to access it.
 * Allow coordinated handoff of server sockets without modifying the main
   program (this will be tricky, but should work nicely)
 * Embed a script runtime (ruby, python, perl, nodejs, etc) into any running program.
+
+## Example: Inspect netcat's socket.
+
+% PARASITE_RUBY=irb-example.rb LD_PRELOAD=./parasite.so nc -l 192.168.0.97 8888
+Parasite initialized by hooking 'malloc'
+>> require "socket"
+=> true
+>> sock = Socket.for_fd(3)
+=> #<Socket:0x7f8a795833c8>
+>> port, address = Socket.unpack_sockaddr_in(sock.getsockname)
+=> [8888, "192.168.0.97"]
 
